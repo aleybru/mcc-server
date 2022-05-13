@@ -1,0 +1,18 @@
+{
+  "name": "xp-server-sms",
+  "version": "1.0.0",
+  "description": "Server application for SMS message operations",
+  "main": "app.js",
+  "scripts": {
+    "iniciar": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daniel Martinez",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "socket.io": "^4.5.0"
+  }
+}
