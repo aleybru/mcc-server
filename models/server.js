@@ -13,10 +13,14 @@ const { socketController } = require('../sockets/controllers');
 class Server {
 
     constructor() {
-        this.app  = express();
+        this.app = express();
         this.port = process.env.PORT;
         this.server = httpServer.createServer(this.app);
-        this.io = socketIO(this.server);
+        this.io = socketIO(this.server, {
+            cors: {
+                origin: "*"
+            }
+        });
         this.paths = {};
 
 
@@ -26,7 +30,7 @@ class Server {
         // Rutas de mi aplicación
         this.routes();
 
-        
+
         this.sockets();
     }
 
@@ -35,27 +39,27 @@ class Server {
     middlewares() {
 
         // CORS
-        this.app.use( cors() );
+        this.app.use(cors());
 
         // Directorio Público
-        this.app.use( express.static('public') );
+        this.app.use(express.static('public'));
 
 
     }
 
     routes() {
-        
+
         // this.app.use( this.paths.auth, require('../routes/auth'));
-        
+
     }
 
-    sockets(){
-        this.io.on( 'connection', socketController );
+    sockets() {
+        this.io.on('connection', socketController);
     }
 
     listen() {
-        this.server.listen( this.port, () => {
-            console.log('Servidor corriendo en puerto', this.port );
+        this.server.listen(this.port, () => {
+            console.log('Servidor corriendo en puerto', this.port);
         });
     }
 
