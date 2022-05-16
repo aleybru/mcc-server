@@ -2,13 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const httpServer = require('http');
 const socketIO = require('socket.io');
-const { socketController } = require('../sockets/controllers');
+const { socketController, connectToWhatsApp } = require('../sockets/controllers');
+const { dbConnection } = require('../database/config');
 
-// const app = require('express')();
-// const server = require('http').createServer(app);
-// const io = require('socket.io')(server);
-// io.on('connection', () => { /* … */ });
-// server.listen(3000);
 
 class Server {
 
@@ -21,8 +17,13 @@ class Server {
                 origin: "*"
             }
         });
-        this.paths = {};
+        this.paths = {
+            auth: '/api/auth',
+            users: '/api/users'
+        };
 
+        //conectar a BD
+        this.conectarDB();
 
         // Middlewares
         this.middlewares();
@@ -39,22 +40,30 @@ class Server {
     middlewares() {
 
         // CORS
-        this.app.use(cors());
+        this.app.use( cors() );
+
+        this.app.use( express.json() );
 
         // Directorio Público
-        this.app.use(express.static('public'));
+        this.app.use( express.static('public') );
 
 
     }
 
     routes() {
 
-        // this.app.use( this.paths.auth, require('../routes/auth'));
+        this.app.use( this.paths.auth, require('../routes/auth'));
+        this.app.use( this.paths.users, require('../routes/users'));
 
+    }
+
+    async conectarDB(){
+        await dbConnection();
     }
 
     sockets() {
         this.io.on('connection', socketController);
+       // this.io.on('connection', connectToWhatsApp);
     }
 
     listen() {

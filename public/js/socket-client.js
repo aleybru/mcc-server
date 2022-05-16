@@ -30,10 +30,18 @@ btnEnviar.addEventListener('click', ()=>{
     const mensaje = txtMensaje.value;
     if(mensaje){
         const payload ={
-            mensaje,
             id:'123456',
-            fecha: new Date().getTime()
+            recipient:'095024444',
+            subject:'Asunto: test de envio',
+            body:'este es un mensaje de prototipo',
+            date: new Date().getTime(),
+            status:'enviando'
+
         };
         socket.emit('enviar-mensaje', payload);
     }   
-})
+
+});
+
+
+
