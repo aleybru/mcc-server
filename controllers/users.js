@@ -1,38 +1,64 @@
 //USERS Controlador
 
 const { response, request } = require('express');
+const bcryptjs = require('bcryptjs');
+const User = require('../models/user');
 
-const getUsers = ( req = require, res = response )=>{
+const getUsers = async (req = request, res = response) => {
 
-    const query = req.query;
-
+    const users = await User.find();
+    // const userloged = req.user;
     res.json({
         ok: true,
-        query,
+        users,
+        // userloged,
         msg: 'get Api USER Controller'
     });
 }
-const postUsers = ( req = require, res = response )=>{
 
-    const body = req.body;
+const postUsers = async (req = request, res = response) => {
 
-    res.json({
-        ok: true,
-        body,
-        msg: 'post Api USER Controller'
-    });
+    const { fullname, username, password, mobile } = req.body;
+
+    const user = new User({ fullname, username, password, mobile });
+
+    const salt = bcryptjs.genSaltSync();
+    user.password = bcryptjs.hashSync(password, salt);
+
+
+    await user.save()
+        .then((user) => {
+            res.json({
+                ok: true,
+                user,
+                msg: 'saved'
+            });
+        }, (error) => {
+            res.status(400).json({
+                ok: false,
+                msg: error.message
+            });
+        });
+
 }
-const putUsers = ( req = require, res = response )=>{
 
-    const id = req.params.id;
+const putUsers = async (req = request, res = response) => {
 
+    const { id } = req.params;
+    const {_id, password, username, ...u } = req.body;
+
+    if (password) {
+        const salt = bcryptjs.genSaltSync();
+        u.password = bcryptjs.hashSync(password, salt);
+    }
+    const user = await User.findByIdAndUpdate(id, u);
     res.json({
         ok: true,
-        id,
+        user,
         msg: 'put Api USER Controller'
     });
 }
-const patchUsers = ( req = require, res = response )=>{
+const patchUsers = (req = request, res = response) => {
 
 
     res.json({
@@ -40,9 +66,13 @@ const patchUsers = ( req = require, res = response )=>{
         msg: 'patch Api USER Controller'
     });
 }
-const deleteUsers = ( req = require, res = response )=>{
 
+const deleteUsers = async (req = request, res = response) => {
 
+    const { id } = req.params;
+    console.log(id);
+    const user = await User.findByIdAndDelete(id);
+    
     res.json({
         ok: true,
         msg: 'delete Api USER Controller'
@@ -50,7 +80,7 @@ const deleteUsers = ( req = require, res = response )=>{
 }
 
 
-module.exports= {
+module.exports = {
     getUsers,
     postUsers,
     putUsers,

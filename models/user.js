@@ -17,12 +17,27 @@ const UserSchema = Schema(
             type: String,
             required: [true, 'La contraseña es requerida']
         },
+        mobile: {
+            type: String,
+            required: [true, 'El teléfono móvil es requerido']
+        },
+        role: {
+            type: String,
+            required: true,
+            emun: ['ADMIN', 'USER'],
+            default: 'USER'   
+        },
         status: {
             type: Boolean,
             default: true
         }
-    }
+    }, { timestamps: true }
     
-    )
+    );
+    UserSchema.methods.toJSON = function() {
+        const { __v, password, _id, ...user  } = this.toObject();
+        user.uid = _id;
+        return user;
+    }
 
-module.exports =model( 'User', UserSchema);
+module.exports = model( 'User', UserSchema);
