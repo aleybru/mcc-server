@@ -33,13 +33,15 @@ router.post('/',
     , postUsers);
 
 //modificar usuarios
-router.put('/:id', [
-    validateJWT,
-    check('id', 'No es un id válido').isMongoId(),
-    check('id').custom(userIdExists),
-    check('username').custom(emailExists),
-    validateFields
-], putUsers);
+router.put('/:id',
+    [
+        validateJWT,
+        check('id', 'No es un id válido').isMongoId(),
+        check('id').custom(userIdExists),
+        check('username').custom(emailExists),
+        validateFields
+    ], 
+    putUsers);
 
 //actualizar usuarios
 router.patch('/', patchUsers);
@@ -54,25 +56,5 @@ router.delete('/:id',
         validateFields
     ],
     deleteUsers);
-
-// //Registro de usuario
-// router.post('/register', ( req, res )=>{
-
-//     return res.json({
-//         ok:true,
-//         msg: 'user register'
-//     });
-// });
-
-// //Login de usuario
-// router.post('/login', ( req, res )=>{
-
-//     return res.json({
-//         ok:true,
-//         msg: 'user login'
-//     });
-// });
-
-
 
 module.exports = router;

@@ -1,6 +1,8 @@
 const { model } = require("mongoose");
 const User = require("../models/user")
 const Role = require('../models/role');
+const Message = require('../models/message');
+
 
 
 const isValidRole = async( role = '' ) => {
@@ -25,9 +27,17 @@ const userIdExists = async ( id ) => {
         throw new Error('El id brindado no existe.')
     }
 }
+const messageIdExists = async ( id ) => {
+    const exists = await Message.findById( id );
+    if( !exists ){
+        console.log('encontró mensaje');
+        throw new Error('El id brindado no existe.')
+    }
+}
 
 module.exports = {
     emailExists,
     userIdExists,
-    isValidRole
+    isValidRole,
+    messageIdExists
 }

@@ -19,7 +19,8 @@ class Server {
         });
         this.paths = {
             auth: '/api/auth',
-            users: '/api/users'
+            users: '/api/users',
+            messages: '/api/messages'
         };
 
         //conectar a BD
@@ -54,6 +55,7 @@ class Server {
 
         this.app.use( this.paths.auth, require('../routes/auth'));
         this.app.use( this.paths.users, require('../routes/users'));
+        this.app.use( this.paths.messages, require('../routes/messages'));
 
     }
 
