@@ -30,6 +30,9 @@ const UserSchema = Schema(
         status: {
             type: Boolean,
             default: true
+        },
+        img:{
+            type: String
         }
     }, { timestamps: true }
     

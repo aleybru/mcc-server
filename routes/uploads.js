@@ -2,7 +2,10 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { postUploads } = require('../controllers/uploads');
+const { postUploads, putUploads } = require('../controllers/uploads');
+
+const { validateFields, validateUpload } = require('../middlewares');
+const { allowedCollections } = require('../helpers');
 
 const router = Router();
 
@@ -10,10 +13,17 @@ const router = Router();
 // router.get('/', getUploads);
 
 //create Uploads
-router.post('/', postUploads);
+router.post('/', validateUpload, postUploads);
 
 //update Uploads
-// router.put('/:id', putUploads);
+ router.put('/:collection/:id',
+    [
+        validateUpload,
+        check('id', 'El id no es válido ').isMongoId(),
+        check('collection').custom( c => allowedCollections( c, ['users'])),
+        validateFields
+    ],
+     putUploads);
 
 //update Uploads
 // router.patch('/', patchUploads);

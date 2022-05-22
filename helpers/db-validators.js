@@ -5,6 +5,15 @@ const Message = require('../models/message');
 
 
 
+const allowedCollections = ( collection = '', collections = [] ) => {
+
+    const included = collections.includes( collection );
+    if ( !included ) {
+        throw new Error(`La colección ${ collection } no está permitida.`);
+    }
+    return true;
+}
+
 const isValidRole = async( role = '' ) => {
 
     const roleExists = await Role.findOne({ role });
@@ -39,5 +48,6 @@ module.exports = {
     emailExists,
     userIdExists,
     isValidRole,
-    messageIdExists
+    messageIdExists,
+    allowedCollections
 }

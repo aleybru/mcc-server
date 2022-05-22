@@ -36,7 +36,7 @@ const uploadFile = async ( files, validExtensions  = ['txt'], uploadFolder = '')
             }
             resolve({
                 ok: true,
-                tempName,
+                filename: tempName,
                 msg: 'post Api Uploads Controller'
             });
     });
