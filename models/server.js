@@ -4,7 +4,7 @@ const httpServer = require('http');
 const socketIO = require('socket.io');
 const { socketController, connectToWhatsApp } = require('../sockets/controllers');
 const { dbConnection } = require('../database/config');
-//const EmailFactory = require('./emails/email-factory');
+const fileUpload = require('express-fileupload');
 
 
 
@@ -24,7 +24,8 @@ class Server {
             website: '/',
             auth: '/api/auth',
             users: '/api/users',
-            messages: '/api/messages'
+            messages: '/api/messages',
+            filesuploads: '/api/uploads'
         };
         
        
@@ -40,6 +41,7 @@ class Server {
 
         this.sockets();
 
+       
     }
 
 
@@ -53,6 +55,13 @@ class Server {
         // Directorio Público
         this.app.use(express.static('public'));
 
+        this.app.use( fileUpload({
+            limits: { fileSize: 50 * 1024 * 1024 },
+            useTempFiles: true,
+            tempFileDir: '/tmp/',
+            createParentPath: true
+          }));
+
     }
 
     routes() {
@@ -61,6 +70,7 @@ class Server {
         this.app.use(this.paths.auth, require('../routes/auth'));
         this.app.use(this.paths.users, require('../routes/users'));
         this.app.use(this.paths.messages, require('../routes/messages'));
+        this.app.use(this.paths.filesuploads, require('../routes/uploads'));
 
     }
 
