@@ -104,33 +104,35 @@ const renewUserToken = async (req = request, res = response) => {
 
 const verifyUser = async (req = request, res = response) => {
 
-    const { code } = req.params;
-
-    const validCode = await VerifyCode.findOne({ code, isused: false, type: 'VERIFY' });
-
-    if (!validCode) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'Código no válido.'
-        });
-    }
-
-    const user = await User.findOneAndUpdate({ _id: validCode.user }, { status: true });
-
-    if (!user) {
-        return res.status(400).json({
-            ok: false,
-            msg: 'Cuenta de usuario no válida. Comuníquese con el administrador.'
-        });
-    }
-    validCode.isused = true;
-    await validCode.save();
-
-    res.json({
-        ok: true,
-        msg: 'Cuenta de usuario activada.'
-    });
     try {
+
+        const { code } = req.params;
+
+        const validCode = await VerifyCode.findOne({ code, isused: false, type: 'VERIFY' });
+
+        if (!validCode) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Código no válido.'
+            });
+        }
+
+        const user = await User.findOneAndUpdate({ _id: validCode.user }, { status: true });
+
+        if (!user) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Cuenta de usuario no válida. Comuníquese con el administrador.'
+            });
+        }
+        validCode.isused = true;
+        await validCode.save();
+
+        res.json({
+            ok: true,
+            msg: 'Cuenta de usuario activada.'
+        });
+
 
     } catch (error) {
         res.status(500).json({
@@ -195,12 +197,12 @@ const changePassword = async (req = request, res = response) => {
 
     try {
 
-       
+
         const { code, password } = req.body;
-   
+
         const validCode = await VerifyCode.findOne({ code, isused: false, type: 'RESET' });
 
-    // console.log(code + password);
+        // console.log(code + password);
         if (!validCode) {
             return res.status(400).json({
                 ok: false,

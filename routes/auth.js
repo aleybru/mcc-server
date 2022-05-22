@@ -53,15 +53,15 @@ router.post('/reset-request',
 
 //change password process
 router.post('/changepwd',
-    // [
-    //     check('code', 'El código de verificación es requerido.').notEmpty(),
-    //     check('password', 'La contraseña debe tener 8 o más caracteres y al menos 1 número.')
-    //         .isLength({ min: 8 })
-    //         .withMessage('Debe tener al menos 8 caracteres.')
-    //         .matches(/\d/)
-    //         .withMessage('Debe contener al menos 1 número.'),
-    //     validateFields
-    // ],
+    [
+        check('code', 'El código de verificación es requerido.').notEmpty(),
+        check('password', 'La contraseña debe tener 8 o más caracteres y al menos 1 número.')
+            .isLength({ min: 8 })
+            .withMessage('Debe tener al menos 8 caracteres.')
+            .matches(/\d/)
+            .withMessage('Debe contener al menos 1 número.'),
+        validateFields
+    ],
     changePassword);
 
 //Validar y revalidar token de usuario
