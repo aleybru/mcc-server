@@ -16,6 +16,11 @@ const VerifyCodeSchema = Schema(
         isused: {
             type: Boolean,
             default: false
+        }, 
+        type: {
+            type: String,
+            required: true,
+            emun: ['VERIFY', 'RESET'],
         }
     }, { timestamps: true }
     
