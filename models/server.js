@@ -66,11 +66,11 @@ class Server {
 
     routes() {
         
-        this.app.use(this.paths.website, require('../routes/website'));
         this.app.use(this.paths.auth, require('../routes/auth'));
         this.app.use(this.paths.users, require('../routes/users'));
         this.app.use(this.paths.messages, require('../routes/messages'));
         this.app.use(this.paths.filesuploads, require('../routes/uploads'));
+        this.app.use(this.paths.website, require('../routes/website'));
 
     }
 

@@ -2,15 +2,15 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
 
-const { postUploads, putUploads } = require('../controllers/uploads');
+const { postUploads, putUploads, getUploads } = require('../controllers/uploads');
 
-const { validateFields, validateUpload } = require('../middlewares');
+const { validateFields, validateUpload, validateJWT } = require('../middlewares');
 const { allowedCollections } = require('../helpers');
 
 const router = Router();
 
 // list all Uploads
-// router.get('/', getUploads);
+router.get('/:collection/:id', getUploads);
 
 //create Uploads
 router.post('/', validateUpload, postUploads);

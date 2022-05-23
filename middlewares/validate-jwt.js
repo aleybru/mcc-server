@@ -6,6 +6,7 @@ const User = require('../models/user');
 
 const validateJWT = async (req, res, next) => {
 
+    try {
     const token = req.header('x-token');
 
     if (!token) {
@@ -14,10 +15,10 @@ const validateJWT = async (req, res, next) => {
         });
     }
 
-    try {
 
         const { uid } = jwt.verify(token, process.env.SECRETEJWTKEY);
         const userloged = await User.findById(uid);
+       
 
         if (!userloged) {
             return res.status(401).json({
@@ -30,7 +31,7 @@ const validateJWT = async (req, res, next) => {
             });
         }
         req.user = userloged;
-       // console.log(req);
+
         next();
     } catch (error) {
         //console.log(error);

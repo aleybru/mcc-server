@@ -61,7 +61,7 @@ const registerUser = async (req = request, res = response) => {
 
     const code = uuidv4();
 
-    const verifyCode = new VerifyCode({ code, user });
+    const verifyCode = new VerifyCode({ code, user, type: 'VERIFY' });
     await user.save()
         .then((user) => {
             verifyCode.save();
@@ -88,16 +88,15 @@ const registerUser = async (req = request, res = response) => {
 }
 
 const renewUserToken = async (req = request, res = response) => {
-    const uid = req.uid;
-
+    const uid = req.user._id;
     // Generar el TOKEN - JWT
-    const token = await generarJWT(uid);
+    const token = await generateJWT(uid);
 
-    const users = await User.findById(uid);
+    const user = await User.findById(uid);
     res.json({
         ok: true,
         token,
-        users,
+        user,
         msg: 'get Api USER Controller'
     });
 }

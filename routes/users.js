@@ -38,7 +38,8 @@ router.put('/:id',
         validateJWT,
         check('id', 'No es un id válido').isMongoId(),
         check('id').custom(userIdExists),
-        check('username').custom(emailExists),
+        check('mobile', 'El teléfono móvil es requerido.').not().isEmpty().trim().escape(),
+        check('fullname', 'El fullname es requerido.').not().isEmpty().trim().escape(),
         validateFields
     ], 
     putUsers);

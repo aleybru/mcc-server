@@ -7,13 +7,45 @@ const fs = require('fs');
 
 const User = require('../models/user');
 
-// const getUploads = async (req = request, res = response) => {
+//update image
+const getUploads = async (req = request, res = response) => {
+    console.log('pasa la peticion');
 
-// res.json({
-// ok: true,
-// msg: 'get Api Uploads Controller'
-// });
-// }
+    const { id, collection } = req.params;
+
+    let model;
+
+    switch (collection) {
+        case 'users':
+            model = await User.findById(id);
+            if (!model) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'No existe el usuario con id'
+                });
+            }
+            break;
+
+        default:
+            return res.status(400).json({
+                ok: false,
+                msg: 'No validado'
+            });
+    }
+
+    if (model.img) {
+        // borrar
+        const pathImg = path.join(__dirname, '../uploads', collection, model.img);
+        if (fs.existsSync(pathImg)) {
+            return res.sendFile(pathImg);
+
+        };
+
+    }
+
+    return res.sendFile(path.join(__dirname, '../uploads', '', 'noimage.jpg'));
+ 
+}
 
 const postUploads = async (req = request, res = response) => {
 
@@ -58,22 +90,22 @@ const putUploads = async (req = request, res = response) => {
     }
 
     //borrar imagenes anteriores
-    if( model.img ){
+    if (model.img) {
         // borrar
-        const pathImg = path.join(__dirname, '../uploads',collection, model.img);
-        if(fs.existsSync( pathImg )){
-            fs.unlinkSync( pathImg );
+        const pathImg = path.join(__dirname, '../uploads', collection, model.img);
+        if (fs.existsSync(pathImg)) {
+            fs.unlinkSync(pathImg);
         }
     }
 
     const validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     const result = await uploadFile(req.files, validExtensions, collection);
-    if(result.ok){
-        
+    if (result.ok) {
+
         model.img = result.filename;
         await model.save();
-        
-    }else{
+
+    } else {
         return res.status(400).json({
             ok: false,
             msg: 'Error al subir archivo'
@@ -87,26 +119,8 @@ const putUploads = async (req = request, res = response) => {
     });
 }
 
-// const patchUploads = (req = request, res = response) => {
-
-// res.json({
-// ok: true,
-// msg: 'patch Api Uploads Controller'
-// });
-// }
-
-// const deleteUploads = async (req = request, res = response) => {
-
-// res.json({
-// ok: true,
-// msg: 'delete Api Uploads Controller'
-// });
-// }
-
 module.exports = {
     postUploads,
     putUploads,
-    // getUploads,
-    // patchUploads,
-    // deleteUploads
+    getUploads
 }

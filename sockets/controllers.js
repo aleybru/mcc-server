@@ -25,9 +25,9 @@ const socketController = ( socket )=>{
         console.log('cliente desconectado', socket.id);
     });
 
-    socket.on('enviar-mensaje', ( payload )=>{
-       
-        socket.broadcast.emit('enviar-mensaje', payload);
+    socket.on('send-message', ( payload )=>{
+       console.log(payload);
+        socket.broadcast.emit('send-message', payload);
     });
 
 }
