@@ -26,9 +26,9 @@ router.get('/:id',
 router.post('/',
     [
         validateJWT,
-        check('subject', 'El Asunto es requerido.').not().isEmpty().trim().escape(),
-        check('body', 'El username no tiene formato de email válido.').not().isEmpty().trim().escape(),
         check('recipient', 'El destinatario es requerido.').not().isEmpty().trim().escape(),
+        check('subject', 'El Asunto es requerido.').not().isEmpty().trim().escape(),
+        check('body', 'El mensaje no tiene contenido.').not().isEmpty().trim().escape(),
         check('type', 'El tipo de mensaje es requerido.').isIn(['WHATSAPP', 'SMS']),
         validateFields
     ],

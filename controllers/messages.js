@@ -1,13 +1,17 @@
 //Controller  Messages
 
 const { response, request } = require('express');
+const middlewares = require('../middlewares');
+
+
 
 const Message = require('../models/message');
+const Server = require('../models/server');
 
 const getMessages = async (req = request, res = response) => {
     try {
 
-        const [ count, messages ] = await Promise.all([Message.countDocuments({ user: req.user }),Message.find({ user: req.user })]);
+        const [count, messages] = await Promise.all([Message.countDocuments({ user: req.user }), Message.find({ user: req.user })]);
 
         res.json({
             ok: true,
@@ -52,19 +56,44 @@ const postMessages = async (req = request, res = response) => {
         });
 
         // Guardar DB
-        const result = await message.save();
-
+         const result = await message.save();
+// console.log(result);
         if (!result) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Error al guardar el mensaje'
             });
+        } else {
+
+        const server = Server.getInstance();
+
+        const users = [];
+        for (let [id, socket] of server.io.of("/").sockets) {
+            users.push({
+                userID: id,
+                uid: socket.uid,
+            });
+        }
+        const sid = users.find(u => u.uid === req.uid);
+        const payload = {
+            subject,
+            body,
+            recipient,
+            sid: sid.userID,
+            uid: sid.uid,
+            mid: result._id
+        }
+       // console.log(payload);
+        server.io.to(sid.userID).emit('send-message', {
+            payload
+        });
+
         }
 
 
         res.json({
             ok: true,
-            req:req.body,
+            req: req.body,
             msg: 'post Api Messages Controller'
         });
 

@@ -31,7 +31,7 @@ const validateJWT = async (req, res, next) => {
             });
         }
         req.user = userloged;
-
+        req.uid = uid;
         next();
     } catch (error) {
         //console.log(error);

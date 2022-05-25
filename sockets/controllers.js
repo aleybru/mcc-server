@@ -1,3 +1,4 @@
+const Message = require('../models/message');
 //whatsapp Server
 const {
     default: makeWASocket,
@@ -13,21 +14,34 @@ const {
     delay
 } = require('@adiwajshing/baileys');
 const { Boom } = require('@hapi/boom'); 
+const message = require('../models/message');
 
 
 
 
 const socketController = ( socket )=>{
 
-    console.log('cliente conectado', socket.id);
+    console.log('cliente conectado', socket.id, socket.uid);
+
 
     socket.on('disconnect', ()=>{
         console.log('cliente desconectado', socket.id);
     });
 
     socket.on('send-message', ( payload )=>{
-       console.log(payload);
-        socket.broadcast.emit('send-message', payload);
+       //console.log('enviado--->',payload);
+        socket.to( payload.uid).emit('send-message', payload );
+    });
+    socket.on('receive-message', async ( payload )=>{
+        socket.to( payload.uid).emit('receibe-message', payload );
+        
+        if(payload.msg==='ENVIADO'){
+
+            await Message.findByIdAndUpdate( payload.mid,{status: payload.status});
+        }else{
+            console.log(payload);
+        }
+
     });
 
 }

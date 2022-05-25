@@ -9,7 +9,7 @@ const User = require('../models/user');
 
 //update image
 const getUploads = async (req = request, res = response) => {
-    console.log('pasa la peticion');
+    
 
     const { id, collection } = req.params;
 

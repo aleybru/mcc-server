@@ -14,7 +14,7 @@ const MessageSchema = Schema(
         },
         status: {
             type: String,
-            default: 'ENVIADO',
+            default: 'PENDIENTE',
             emun: ['PENDIENTE','ENVIADO', 'CANCELADO'],
         },
         recipient: {
