@@ -1,6 +1,5 @@
 const Message = require('../models/message');
 const { Boom } = require('@hapi/boom'); 
-const message = require('../models/message');
 
 
 

@@ -1,50 +1,45 @@
 //middleware  Validate JWT
 
-const { response, request } = require('express');
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const validateJWT = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            ok: false,
+            msg: 'Token no proporcionado en el header Authorization'
+        });
+    }
+
+    const token = authHeader.split(' ')[1];
 
     try {
-    const token = req.header('x-token');
+        const { uid } = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!token) {
-        return res.status(400).json({
-            msg: 'No existe token'
-        });
-    }
+        const user = await User.findById(uid);
 
-
-        const { uid } = jwt.verify(token, process.env.SECRETEJWTKEY);
-        const userloged = await User.findById(uid);
-       
-
-        if (!userloged) {
+        if (!user || !user.status) {
             return res.status(401).json({
-                msg: 'Usuario no existe'
+                ok: false,
+                msg: 'Token inválido o usuario inactivo'
             });
         }
-        if (!userloged.status) {
-            return res.status(401).json({
-                msg: 'Usuario deshabilitado'
-            });
-        }
-        req.user = userloged;
+
+        req.user = user.toJSON();
         req.uid = uid;
+
         next();
+
     } catch (error) {
-        //console.log(error);
-        res.status(401).json({
-            msg: 'Token no válido'
+        return res.status(401).json({
+            ok: false,
+            msg: 'Token inválido'
         });
     }
-
-
-
-}
-
+};
 
 module.exports = {
     validateJWT
-}
+};

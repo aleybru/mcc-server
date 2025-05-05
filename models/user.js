@@ -1,5 +1,6 @@
-
+//user model
 const { Schema, model } = require('mongoose');
+const applyPasswordHashing = require('../middlewares/hash-password');
 
 const UserSchema = Schema(
 
@@ -19,12 +20,13 @@ const UserSchema = Schema(
         },
         mobile: {
             type: String,
-            required: [true, 'El teléfono móvil es requerido']
+            required: [true, 'El teléfono móvil es requerido'],
+            match: [/^\+?[1-9]\d{6,14}$/, 'Número de teléfono inválido']
         },
         role: {
             type: String,
             required: true,
-            emun: ['ADMIN', 'USER'],
+            enum: ['ADMIN', 'USER'],
             default: 'USER'   
         },
         status: {
@@ -37,6 +39,11 @@ const UserSchema = Schema(
     }, { timestamps: true }
     
     );
+
+    // Aplicar middleware
+    applyPasswordHashing(UserSchema);
+
+
     UserSchema.methods.toJSON = function() {
         const { __v, password, _id, ...user  } = this.toObject();
         user.uid = _id;

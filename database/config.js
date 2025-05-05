@@ -5,7 +5,8 @@ mongoose.set('strictQuery', true);
 const dbConnection = async () => {
     try {
 
-        await mongoose.connect(process.env.DATABASE_CNN, {});
+        await mongoose.connect(process.env.DATABASE_CNN);
+        
 
         console.log('BD en linea');
     } catch (error) {

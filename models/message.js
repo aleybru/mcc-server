@@ -1,39 +1,38 @@
-//Model  Message
+//Model Message
 const { Schema, model } = require('mongoose');
 
-const MessageSchema = Schema(
-    {
-        subject: {
-            type: String,
-            required: [true, 'El Asunto es requerido'],
-            default: 'Atención!'
-        },
-        body: {
-            type: String,
-            required: [true, 'El Cuerpo del mensaje es requerido']
-        },
-        status: {
-            type: String,
-            default: 'PENDIENTE',
-            emun: ['PENDIENTE','ENVIADO', 'CANCELADO'],
-        },
-        recipient: {
-            type: String,
-            required: [true, 'El destinatario es requerido'],
-        },
-        type: {
-            type: String,
-            required: [true, 'El tipo de mensaje es requerido'],
-            emun: ['WHATSAPP', 'SMS'],
-        },
-        user: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        }
+const MessageSchema = Schema({
+    subject: {
+        type: String,
+        required: [true, 'El Asunto es requerido'],
+        default: 'Atención!'
     },
-    { timestamps: true }
-);
+    body: {
+        type: String,
+        required: [true, 'El Cuerpo del mensaje es requerido']
+    },
+    status: {
+        type: String,
+        default: 'PENDIENTE',
+        enum: ['PENDIENTE', 'ENVIADO', 'CANCELADO']
+    },
+    recipient: {
+        type: String,
+        required: [true, 'El destinatario es requerido']
+    },
+    type: {
+        type: String,
+        required: [true, 'El tipo de mensaje es requerido'],
+        enum: ['WHATSAPP', 'SMS', 'EMAIL', 'PUSH']
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
+}, {
+    timestamps: true
+});
 
 MessageSchema.methods.toJSON = function () {
     const { __v, _id, ...message } = this.toObject();

@@ -35,12 +35,15 @@ const loginUser = async (req = request, res = response) => {
         }
         // generar Jason Web Token - JWT
         const token = await generateJWT(user.id);
-        res.json({
-            ok: true,
-            user,
-            token,
-            msg: 'login'
-        });
+        res.status(200).json({
+            user: {
+              uid: user.id,
+              fullname: user.fullname,
+              username: user.username,
+              role: user.role
+            },
+            token
+          });
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -54,17 +57,20 @@ const registerUser = async (req = request, res = response) => {
 
     const { fullname, username, password, mobile } = req.body;
 
-    const user = new User({ fullname, username, password, mobile });
+    const exists = await User.findOne({ username });
+    if (exists) {
+    return res.status(400).json({ ok: false, msg: 'Ese usuario ya existe.' });
+    }
 
-    const salt = bcryptjs.genSaltSync();
-    user.password = bcryptjs.hashSync(password, salt);
+
+    const user = new User({ fullname, username, password, mobile });
 
     const code = uuidv4();
 
     const verifyCode = new VerifyCode({ code, user, type: 'VERIFY' });
     await user.save()
-        .then((user) => {
-            verifyCode.save();
+        .then(async (user) => {
+            await verifyCode.save();
             const data = {
                 user,
                 code,
@@ -187,7 +193,8 @@ const resetPassword = async (req = request, res = response) => {
     } catch (error) {
         res.status(500).json({
             ok: false,
-            msg: 'Error general - reqchgpwd'
+            msg: `Error general - chgpwd: ${error.message}`
+
         });
     }
 }
@@ -208,27 +215,25 @@ const changePassword = async (req = request, res = response) => {
                 msg: 'Código no válido.'
             });
         }
+        const user = await User.findById(validCode.user);
+        user.password = password; // middleware hace el hash
 
-        const salt = bcryptjs.genSaltSync();
-        const pwd = bcryptjs.hashSync(password, salt)
+        const saved = await user.save();
 
-        const result = await User.findOneAndUpdate({ _id: validCode.user }, { password: pwd });
-
-        if (result) {
-
-            validCode.isused = true;
-            await validCode.save();
-        } else {
-            return res.status(400).json({
-                ok: false,
-                msg: 'Error al procesar el cambio de contraseña.'
-            });
-        }
-
-        res.json({
+        if (saved) {
+          validCode.isused = true;
+          await validCode.save();
+          res.json({
             ok: true,
             msg: 'Contraseña cambiada.'
-        });
+          });
+        } else {
+          return res.status(400).json({
+            ok: false,
+            msg: 'Error al procesar el cambio de contraseña.'
+          });
+        }
+        
 
     } catch (error) {
         res.status(500).json({

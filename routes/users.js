@@ -44,9 +44,16 @@ router.put('/:id',
     ], 
     putUsers);
 
-//actualizar usuarios
-router.patch('/', patchUsers);
-
+// Actualización parcial de usuario
+router.patch('/:id',
+    [
+        validateJWT,
+        check('id', 'No es un id válido').isMongoId(),
+        check('id').custom(userIdExists),
+        validateFields
+    ],
+    patchUsers
+);
 //eliminar usuarios
 router.delete('/:id',
     [

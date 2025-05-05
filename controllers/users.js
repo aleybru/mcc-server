@@ -1,85 +1,116 @@
-//USERS Controlador
-
 const { response, request } = require('express');
 const bcryptjs = require('bcryptjs');
 const User = require('../models/user');
 
+// 🔍 Obtener todos los usuarios
 const getUsers = async (req = request, res = response) => {
-
-    const users = await User.find();
-    // const userloged = req.user;
-    res.json({
-        ok: true,
-        users,
-        // userloged,
-        msg: 'get Api USER Controller'
-    });
-}
-
-const postUsers = async (req = request, res = response) => {
-
-    const { fullname, username, password, mobile } = req.body;
-
-    const user = new User({ fullname, username, password, mobile });
-
-    const salt = bcryptjs.genSaltSync();
-    user.password = bcryptjs.hashSync(password, salt);
-
-
-    await user.save()
-        .then((user) => {
-            res.json({
-                ok: true,
-                user,
-                msg: 'saved'
-            });
-        }, (error) => {
-            res.status(400).json({
-                ok: false,
-                msg: error.message
-            });
+    try {
+        const users = await User.find().select('-password'); // no enviar password nunca
+        res.json({
+            ok: true,
+            users,
+            msg: 'Lista de usuarios'
         });
-
-}
-
-const putUsers = async (req = request, res = response) => {
-
-    const { id } = req.params;
-    const {_id, password, username, ...u } = req.body;
-    
-    if (password) {
-        const salt = bcryptjs.genSaltSync();
-        u.password = bcryptjs.hashSync(password, salt);
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener usuarios'
+        });
     }
-    const user = await User.findByIdAndUpdate(id, u, { new: true });
-    console.log(user);
-    res.json({
-        ok: true,
-        user,
-        msg: 'put Api USER Controller'
-    });
-}
-const patchUsers = (req = request, res = response) => {
+};
 
+// ➕ Crear nuevo usuario
+const postUsers = async (req = request, res = response) => {
+    try {
+        const { fullname, username, password, mobile } = req.body;
 
-    res.json({
-        ok: true,
-        msg: 'patch Api USER Controller'
-    });
-}
+        const exists = await User.findOne({ username });
+        if (exists) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El usuario ya existe.'
+            });
+        }
 
-const deleteUsers = async (req = request, res = response) => {
+        const user = new User({ fullname, username, password, mobile });
 
+        // Hash en el middleware de pre-save (si ya lo tenés)
+        await user.save();
+
+        res.status(201).json({
+            ok: true,
+            user,
+            msg: 'Usuario creado'
+        });
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: `Error al crear usuario: ${error.message}`
+        });
+    }
+};
+
+// ✏️ Actualizar usuario
+const putUsers = async (req = request, res = response) => {
     const { id } = req.params;
-    console.log(id);
-    const user = await User.findByIdAndDelete(id);
-    
-    res.json({
-        ok: true,
-        msg: 'delete Api USER Controller'
-    });
-}
+    const { _id, password, username, ...resto } = req.body;
 
+    try {
+        if (password) {
+            const salt = bcryptjs.genSaltSync();
+            resto.password = bcryptjs.hashSync(password, salt);
+        }
+
+        const user = await User.findByIdAndUpdate(id, resto, { new: true }).select('-password');
+        res.json({
+            ok: true,
+            user,
+            msg: 'Usuario actualizado'
+        });
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al actualizar usuario'
+        });
+    }
+};
+
+const patchUsers = async (req = request, res = response) => {
+    const { id } = req.params;
+    const { _id, password, username, ...campos } = req.body;
+
+    try {
+        const user = await User.findByIdAndUpdate(id, campos, { new: true }).select('-password');
+        res.json({
+            ok: true,
+            user,
+            msg: 'Usuario actualizado parcialmente'
+        });
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: `Error al actualizar parcialmente el usuario: ${error.message}`
+        });
+    }
+};
+
+
+// ❌ Eliminar usuario
+const deleteUsers = async (req = request, res = response) => {
+    const { id } = req.params;
+    try {
+        await User.findByIdAndDelete(id);
+        res.json({
+            ok: true,
+            msg: 'Usuario eliminado'
+        });
+    } catch (error) {
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al eliminar usuario'
+        });
+    }
+};
 
 module.exports = {
     getUsers,
@@ -87,4 +118,4 @@ module.exports = {
     putUsers,
     patchUsers,
     deleteUsers
-}
+};
