@@ -6,11 +6,15 @@ const userRoutes = require('./users');
 const messageRoutes = require('./messages');
 const uploadRoutes = require('./uploads');
 const websiteRoutes = require('./website');
+const clientRoutes = require('./clients');
+const deviceRoutes = require('./devices');
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/clients', clientRoutes);
+router.use('/devices', deviceRoutes);
 router.use('/messages', messageRoutes);
 router.use('/uploads', uploadRoutes);
 router.use('/', websiteRoutes); // Home, landing, etc.
