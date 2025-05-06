@@ -54,17 +54,17 @@ const postMessages = async (req = request, res = response) => {
             type,
             user: req.user
         });
-
         // Guardar DB
-         const result = await message.save();
-// console.log(result);
+        const result = await message.save();
+         //console.log(result);
         if (!result) {
             return res.status(400).json({
                 ok: false,
                 msg: 'Error al guardar el mensaje'
             });
         } else {
-
+            
+           // console.log(message)
         const server = Server.getInstance();
 
         const users = [];
@@ -83,7 +83,8 @@ const postMessages = async (req = request, res = response) => {
             uid: sid.uid,
             mid: result._id
         }
-       // console.log(payload);
+       
+        console.log(payload);
         server.io.to(sid.userID).emit('send-message', {
             payload
         });

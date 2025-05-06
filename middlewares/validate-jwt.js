@@ -8,7 +8,7 @@ const validateJWT = async (req, res, next) => {
 
     try {
     const token = req.header('x-token');
-
+console.log(token)
     if (!token) {
         return res.status(400).json({
             msg: 'No existe token'

@@ -59,6 +59,7 @@ const putUsers = async (req = request, res = response) => {
         msg: 'put Api USER Controller'
     });
 }
+
 const patchUsers = (req = request, res = response) => {
 
 
@@ -79,7 +80,6 @@ const deleteUsers = async (req = request, res = response) => {
         msg: 'delete Api USER Controller'
     });
 }
-
 
 module.exports = {
     getUsers,
