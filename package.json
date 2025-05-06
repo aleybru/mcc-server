@@ -11,7 +11,10 @@
   "author": "Daniel Martinez",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
     "@adiwajshing/baileys": "^3.5.3",
+=======
+>>>>>>> 210abbd83678a284e2b3d8d8a3a475671cf6435a
     "@hapi/boom": "^10.0.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -20,7 +23,11 @@
     "express-fileupload": "^1.3.1",
     "express-validator": "^6.14.0",
     "jsonwebtoken": "^9.0.2",
+<<<<<<< HEAD
     "mongoose": "^6.3.3",
+=======
+    "mongoose": "^8.14.1",
+>>>>>>> 210abbd83678a284e2b3d8d8a3a475671cf6435a
     "nodemailer": "^6.7.5",
     "nodemailer-express-handlebars": "^5.0.0",
     "nodemon": "^3.1.10",

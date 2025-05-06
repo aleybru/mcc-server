@@ -2,32 +2,51 @@
 
 const { response, request } = require('express');
 const middlewares = require('../middlewares');
-
-
-
 const Message = require('../models/message');
 const Server = require('../models/server');
 
 const getMessages = async (req = request, res = response) => {
     try {
+        const uid = req.uid;
 
-        const [count, messages] = await Promise.all([Message.countDocuments({ user: req.user }), Message.find({ user: req.user })]);
+        const {
+            from = 0,
+            limit = 10,
+            type,
+            status
+        } = req.query;
+
+        const query = { user: uid };
+
+        if (type) query.type = type.toUpperCase();
+        if (status) query.status = status.toUpperCase();
+
+        const [count, messages] = await Promise.all([
+            Message.countDocuments(query),
+            Message.find(query)
+                .skip(Number(from))
+                .limit(Number(limit))
+                .sort({ createdAt: -1 }) // más nuevos primero
+                .populate('user', 'fullname username') // opcional: mostrar info del user
+        ]);
 
         res.json({
             ok: true,
             count,
-            messages,
-            msg: 'post Api Messages Controller'
+            from: Number(from),
+            limit: Number(limit),
+            messages
         });
 
     } catch (error) {
+        console.error('💥 Error en getMessages:', error);
         res.status(500).json({
             ok: false,
-            error,
-            msg: 'Error general'
+            msg: 'Error al obtener los mensajes'
         });
     }
-}
+};
+
 
 const getMessage = async (req = request, res = response) => {
 
@@ -42,70 +61,79 @@ const getMessage = async (req = request, res = response) => {
     });
 }
 
+
 const postMessages = async (req = request, res = response) => {
     try {
+        const mensajes = req.body;
 
-        const { subject, body, recipient, type } = req.body;
-
-        const message = new Message({
-            subject,
-            body,
-            recipient,
-            type,
-            user: req.user
-        });
-        // Guardar DB
-        const result = await message.save();
-         //console.log(result);
-        if (!result) {
+        if (!Array.isArray(mensajes) || mensajes.length === 0) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Error al guardar el mensaje'
+                msg: 'La lista está vacía, no hay mensajes para enviar.'
             });
-        } else {
-            
-           // console.log(message)
-        const server = Server.getInstance();
+        }
 
-        const users = [];
-        for (let [id, socket] of server.io.of("/").sockets) {
-            users.push({
-                userID: id,
-                uid: socket.uid,
+        const mensajesValidos = [];
+        const mensajesInvalidos = [];
+
+        for (const [i, msg] of mensajes.entries()) {
+            const { subject, body, recipient, type } = msg;
+
+            const errores = [];
+
+            if (!subject) errores.push('Asunto requerido');
+            if (!body) errores.push('Cuerpo requerido');
+            if (!recipient) errores.push('Destinatario requerido');
+            if (!['EMAIL', 'SMS'].includes((type || '').toUpperCase())) errores.push('Tipo inválido (EMAIL o SMS)');
+
+            if (errores.length > 0) {
+                mensajesInvalidos.push({ index: i, errores, msg });
+                continue;
+            }
+
+            mensajesValidos.push(new Message({
+                subject,
+                body,
+                recipient,
+                type: type.toUpperCase(),
+                user: req.uid
+            }));
+        }
+
+        const guardados = await Message.insertMany(mensajesValidos);
+
+        // Emitir por socket
+        const server = Server.getInstance();
+        guardados.forEach(m => {
+            server.io.emit('send-message', {
+                subject: m.subject,
+                body: m.body,
+                recipient: m.recipient,
+                type: m.type,
+                mid: m._id
             });
-        }
-        const sid = users.find(u => u.uid === req.uid);
-        const payload = {
-            subject,
-            body,
-            recipient,
-            sid: sid.userID,
-            uid: sid.uid,
-            mid: result._id
-        }
-       
-        console.log(payload);
-        server.io.to(sid.userID).emit('send-message', {
-            payload
         });
 
-        }
-
-
-        res.json({
+        return res.json({
             ok: true,
-            req: req.body,
-            msg: 'post Api Messages Controller'
+            enviados: guardados.length,
+            rechazados: mensajesInvalidos.length,
+            errores: mensajesInvalidos
         });
 
     } catch (error) {
-        res.status(500).json({
+        console.error('💥 Error en postMessages:', error);
+        return res.status(500).json({
             ok: false,
-            error,
-            msg: 'Error general'
+            msg: 'Error interno al procesar los mensajes.'
         });
     }
-}
+};
+
+
+
+
+
 
 // const putMessages = async (req = request, res = response) => {
 
